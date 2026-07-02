@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class Api extends Request
 {
-	const ROOT_URL = 'https://ukrposhta.ua/ecom/0.0.1';
+	const ROOT_URL = 'https://www.ukrposhta.ua/ecom/0.0.1';
 
 	protected function getHeaders(): array
 	{
