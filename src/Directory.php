@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class Directory extends Request
 {
-	const ROOT_URL = 'https://ukrposhta.ua/address-classifier-ws';
+	const ROOT_URL = 'https://www.ukrposhta.ua/address-classifier-ws';
 
 	protected function response(ResponseInterface $response)
 	{
