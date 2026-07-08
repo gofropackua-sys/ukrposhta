@@ -141,7 +141,7 @@ class Client extends Api
 	{
 		// 1. Формуємо базовий шлях додаючи змінні сегменти до 'clients'
 		$url = $this->getUrl(function (string $url) use ($clientUuidOrPostId, $freeShipmentsType) {
-			return $url . "/{$clientUuidOrPostId}/free-shipments/{freeShipmentsType}";
+			return $url . "/{$clientUuidOrPostId}/free-shipments/{$freeShipmentsType}";
 		});
 
 		// 2. Отримуємо User Token безпосередньо з конфігурації, яка є в базовому класі Api
