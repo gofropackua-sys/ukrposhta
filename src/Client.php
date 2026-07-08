@@ -128,4 +128,31 @@ class Client extends Api
 
 		return $this->address;
 	}
+
+	/**
+	 * Отримання кількості доступних бонусних відправлень за програмою лояльності
+	 * * URI: /clients/{clientUuidOrPostId}/free-shipments/{freeShipmentsType}?token={token}
+	 *
+	 * @param string $clientUuidOrPostId UUID або PostId клієнта
+	 * @param string $freeShipmentsType  Тип відправлення (наприклад, 'EXPRESS' або 'STANDARD')
+	 * @return array
+	 */
+	public function getFreeShipments(string $clientUuidOrPostId, string $freeShipmentsType = 'EXPRESS'): array
+	{
+		// 1. Формуємо базовий шлях додаючи змінні сегменти до 'clients'
+		$url = $this->getUrl(function (string $url) use ($clientUuidOrPostId, $freeShipmentsType) {
+			return $url . "/{$clientUuidOrPostId}/free-shipments/{freeShipmentsType}";
+		});
+
+		// 2. Отримуємо User Token безпосередньо з конфігурації, яка є в базовому класі Api
+		$token = $this->configuration->getToken();
+
+		// 3. Передаємо токен як query-параметр через об'єкт Storage
+		$params = new Storage([
+			'token' => $token
+		]);
+
+		// 4. Робимо стандартний GET-запит через вбудований метод бібліотеки
+		return $this->send($url, $params, 'GET');
+	}
 }
