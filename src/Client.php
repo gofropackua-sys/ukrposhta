@@ -129,44 +129,69 @@ class Client extends Api
 		return $this->address;
 	}
 
-	/**
- * Отримання інформації про бонусні відправлення клієнта за програмою лояльності
- * 
- * URI: /clients/{clientUuidOrPostId}/free-shipments/{freeShipmentsType}?token={token}
+/**
+ * Получение количества доступных бонусных отправлений по программе лояльности
  *
- * @param string $clientUuidOrPostId UUID або PostId клієнта
- * @param string $programType        Тип програми бонусів ('LOYALTY_PROGRAM' за замовчуванням, або 'PROMO_ACTION')
- * @param string|null $shipmentType  Опціональний фільтр за типом відправлення ('EXPRESS' або 'STANDARD')
+ * @param string $clientUuidOrPostId UUID или PostId клиента
+ * @param string $programType        Тип программы ('LOYALTY_PROGRAM' или 'PROMO_ACTION')
  * @return array
  */
-public function getFreeShipments(
-    string $clientUuidOrPostId, 
-    string $programType = 'LOYALTY_PROGRAM', 
-    ?string $shipmentType = null
-): array {
-    // 1. Формуємо шлях згідно зі специфікацією: /clients/{uuid}/free-shipments/{programType}
+public function getFreeShipments(string $clientUuidOrPostId, string $programType = 'LOYALTY_PROGRAM'): array
+{
+    // 1. Формируем URL
     $url = $this->getUrl(function (string $baseUrl) use ($clientUuidOrPostId, $programType) {
         return "{$baseUrl}/{$clientUuidOrPostId}/free-shipments/{$programType}";
     });
 
-    // 2. Отримуємо User Token з конфігурації
+    // 2. Токен из конфигурации
     $token = $this->configuration->getToken();
 
-    // 3. Передаємо обов'язковий query-параметр token
+    // 3. Передаем query-параметр token через Storage
     $params = new Storage([
         'token' => $token
     ]);
 
-    // 4. Виконуємо GET-запит
+    // 4. Отправляем GET-запрос
     $response = $this->send($url, $params, 'GET');
 
-    // Якщо потрібна фільтрація за типом відправлення (EXPRESS / STANDARD)
-    if ($shipmentType !== null && is_array($response)) {
-        return array_values(array_filter($response, function ($item) use ($shipmentType) {
-            return isset($item['type']) && strtoupper($item['type']) === strtoupper($shipmentType);
-        }));
+    // Структура по умолчанию
+    $result = [
+        'EXPRESS' => [
+            'limit' => 0,
+            'used'  => 0,
+            'free'  => 0,
+            'fromDate' => null,
+            'toDate'   => null,
+        ],
+        'STANDARD' => [
+            'limit' => 0,
+            'used'  => 0,
+            'free'  => 0,
+            'fromDate' => null,
+            'toDate'   => null,
+        ]
+    ];
+
+    if (is_array($response)) {
+        foreach ($response as $item) {
+            $type = strtoupper($item['type'] ?? '');
+            
+            if (isset($result[$type])) {
+                $limit = (int)($item['limit'] ?? 0);
+                $used  = is_array($item['usedShipments'] ?? null) ? count($item['usedShipments']) : 0;
+                $free  = max(0, $limit - $used);
+
+                $result[$type] = [
+                    'limit'    => $limit,
+                    'used'     => $used,
+                    'free'     => $free,
+                    'fromDate' => $item['fromDate'] ?? null,
+                    'toDate'   => $item['toDate'] ?? null,
+                ];
+            }
+        }
     }
 
-    return is_array($response) ? $response : [];
+    return $result;
 }
 }
