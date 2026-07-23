@@ -130,29 +130,43 @@ class Client extends Api
 	}
 
 	/**
-	 * Отримання кількості доступних бонусних відправлень за програмою лояльності
-	 * * URI: /clients/{clientUuidOrPostId}/free-shipments/{freeShipmentsType}?token={token}
-	 *
-	 * @param string $clientUuidOrPostId UUID або PostId клієнта
-	 * @param string $freeShipmentsType  Тип відправлення (наприклад, 'EXPRESS' або 'STANDARD')
-	 * @return array
-	 */
-	public function getFreeShipments(string $clientUuidOrPostId, string $freeShipmentsType = 'EXPRESS'): array
-	{
-		// 1. Формуємо базовий шлях додаючи змінні сегменти до 'clients'
-		$url = $this->getUrl(function (string $url) use ($clientUuidOrPostId, $freeShipmentsType) {
-			return $url . "/{$clientUuidOrPostId}/free-shipments/{$freeShipmentsType}";
-		});
+ * Отримання інформації про бонусні відправлення клієнта за програмою лояльності
+ * 
+ * URI: /clients/{clientUuidOrPostId}/free-shipments/{freeShipmentsType}?token={token}
+ *
+ * @param string $clientUuidOrPostId UUID або PostId клієнта
+ * @param string $programType        Тип програми бонусів ('LOYALTY_PROGRAM' за замовчуванням, або 'PROMO_ACTION')
+ * @param string|null $shipmentType  Опціональний фільтр за типом відправлення ('EXPRESS' або 'STANDARD')
+ * @return array
+ */
+public function getFreeShipments(
+    string $clientUuidOrPostId, 
+    string $programType = 'LOYALTY_PROGRAM', 
+    ?string $shipmentType = null
+): array {
+    // 1. Формуємо шлях згідно зі специфікацією: /clients/{uuid}/free-shipments/{programType}
+    $url = $this->getUrl(function (string $baseUrl) use ($clientUuidOrPostId, $programType) {
+        return "{$baseUrl}/{$clientUuidOrPostId}/free-shipments/{$programType}";
+    });
 
-		// 2. Отримуємо User Token безпосередньо з конфігурації, яка є в базовому класі Api
-		$token = $this->configuration->getToken();
+    // 2. Отримуємо User Token з конфігурації
+    $token = $this->configuration->getToken();
 
-		// 3. Передаємо токен як query-параметр через об'єкт Storage
-		$params = new Storage([
-			'token' => $token
-		]);
+    // 3. Передаємо обов'язковий query-параметр token
+    $params = new Storage([
+        'token' => $token
+    ]);
 
-		// 4. Робимо стандартний GET-запит через вбудований метод бібліотеки
-		return $this->send($url, $params, 'GET');
-	}
+    // 4. Виконуємо GET-запит
+    $response = $this->send($url, $params, 'GET');
+
+    // Якщо потрібна фільтрація за типом відправлення (EXPRESS / STANDARD)
+    if ($shipmentType !== null && is_array($response)) {
+        return array_values(array_filter($response, function ($item) use ($shipmentType) {
+            return isset($item['type']) && strtoupper($item['type']) === strtoupper($shipmentType);
+        }));
+    }
+
+    return is_array($response) ? $response : [];
+}
 }
