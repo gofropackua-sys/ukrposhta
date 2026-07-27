@@ -6,20 +6,20 @@ use Psr\Http\Message\ResponseInterface;
 
 class Parser
 {
-	public function toArray(ResponseInterface $response)
+public function toArray(ResponseInterface $response)
 {
-    $responseType = $response->getHeaderLine('content-type');
+    $body = (string)$response->getBody();
+    $contentType = strtolower($response->getHeaderLine('Content-Type'));
 
-    if (stristr($responseType, 'application/xml')) {
-        return $this->fromXml((string)$response->getBody());
+    if (strpos($contentType, 'application/json') !== false) {
+        return json_decode($body, true);
     }
 
-    if (stristr($responseType, 'application/json')) {
-        return $this->fromJson((string)$response->getBody());
+    if (strpos($contentType, 'xml') !== false) {
+        return $this->fromXml($body);
     }
 
-    // PDF и другие бинарные файлы
-    return (string)$response->getBody();
+    return $body;
 }
 	
 	/*public function toArray(ResponseInterface $response)
