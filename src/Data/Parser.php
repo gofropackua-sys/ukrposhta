@@ -7,6 +7,22 @@ use Psr\Http\Message\ResponseInterface;
 class Parser
 {
 	public function toArray(ResponseInterface $response)
+{
+    $responseType = $response->getHeaderLine('content-type');
+
+    if (stristr($responseType, 'application/xml')) {
+        return $this->fromXml((string)$response->getBody());
+    }
+
+    if (stristr($responseType, 'application/json')) {
+        return $this->fromJson((string)$response->getBody());
+    }
+
+    // PDF и другие бинарные файлы
+    return (string)$response->getBody();
+}
+	
+	/*public function toArray(ResponseInterface $response)
 	{
 		$responseType = $response->getHeaderLine('content-type');
 
@@ -19,7 +35,7 @@ class Parser
 		}
 
 		return (array)$response->getBody();
-	}
+	}*/
 
 	protected function fromXml(string $body)
 	{
