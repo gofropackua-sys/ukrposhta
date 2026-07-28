@@ -78,4 +78,20 @@ class Shipment extends Api
 
 		return $this->send($url);
 	}
+	/**
+	 * Створення бонусного відправлення за програмою лояльності.
+	 * 
+	 * @param Storage $params Параметри відправлення та посилок
+	 * @param string $token Токен програми лояльності
+	 * @return array
+	 */
+	public function createLoyaltyBonus(Storage $params, string $token): array
+	{
+		$url = $this->getUrl(function (string $url) use ($token) {
+			return $url . "/loyalty-program/free?token=" . urlencode($token);
+		});
+
+		return $this->send($url, $params, 'POST');
+	}
+	
 }
