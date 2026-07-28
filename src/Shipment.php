@@ -93,5 +93,21 @@ class Shipment extends Api
 
 		return $this->send($url, $params, 'POST');
 	}
+	/**
+	 * Отримання розрахунку за відправленням в межах країни.
+	 * 
+	 * @see https://dev.ukrposhta.ua
+	 * @param Storage $params Параметри відправлення для розрахунку
+	 * @return array
+	 */
+	public function calculateDomesticPrice(Storage $params): array
+	{
+		$url = $this->getUrl(function (string $url) {
+			// Замінюємо 'shipments' на 'domestic/delivery-price' відповідно до специфікації
+			return str_replace('shipments', 'domestic/delivery-price', $url);
+		});
+
+		return $this->send($url, $params, 'POST');
+	}
 	
 }
