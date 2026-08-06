@@ -125,5 +125,26 @@ class Shipment extends Api
 
 		return $this->send($url, $params, 'POST');
 	}
+	/**
+	 * Зміна ПІБ або номера телефону одержувача відправлення.
+	 * 
+	 * @param string $shipmentUuid Uuid відправлення
+	 * @param string $newRecipientUuid UUID попередньо створеного клієнта з новими даними
+	 * @return array
+	 */
+	public function changeRecipient(string $shipmentUuid, string $newRecipientUuid): array
+	{
+		$url = $this->getUrl(function (string $url) use ($shipmentUuid) {
+			return str_replace('shipments', "shipments/management/{$shipmentUuid}/recipient", $url);
+		});
+
+		$params = new Storage([
+			"recipient" => [
+				"uuid" => $newRecipientUuid
+			]
+		]);
+
+		return $this->send($url, $params, 'PUT');
+	}
 	
 }
