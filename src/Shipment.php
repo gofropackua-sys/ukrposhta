@@ -109,5 +109,21 @@ class Shipment extends Api
 
 		return $this->send($url, $params, 'POST');
 	}
+
+	/**
+	 * Переадресація відправлення.
+	 * 
+	 * @param string $shipmentUuid Uuid відправлення, яке потрібно переадресувати
+	 * @param Storage $params Параметри (містить recipient з новим uuid та deliveryType)
+	 * @return array
+	 */
+	public function forward(string $shipmentUuid, Storage $params): array
+	{
+		$url = $this->getUrl(function (string $url) use ($shipmentUuid) {
+			return str_replace('shipments', "shipments/management/{$shipmentUuid}/forward", $url);
+		});
+
+		return $this->send($url, $params, 'POST');
+	}
 	
 }
