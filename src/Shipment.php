@@ -117,10 +117,13 @@ class Shipment extends Api
 	 * @param Storage $params Параметри (містить recipient з новим uuid та deliveryType)
 	 * @return array
 	 */
-	public function forward(string $shipmentUuid, Storage $params): array
+public function forward(string $shipmentUuid, Storage $params): array
 	{
-		$url = $this->getUrl(function (string $url) use ($shipmentUuid) {
-			return str_replace('shipments', "shipments/management/{$shipmentUuid}/forward", $url);
+		$token = $this->configuration->getToken();
+
+		$url = $this->getUrl(function (string $url) use ($shipmentUuid, $token) {
+			$path = str_replace('shipments', "shipments/management/{$shipmentUuid}/forward", $url);
+			return "{$path}?token=" . urlencode($token);
 		});
 
 		return $this->send($url, $params, 'POST');
