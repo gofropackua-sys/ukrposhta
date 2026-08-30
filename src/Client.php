@@ -194,4 +194,36 @@ public function getFreeShipments(string $clientUuidOrPostId, string $programType
 
     return $result;
 }
+
+	/**
+	 * Зміна даних одержувача відправлення
+	 *
+	 * @param string $shipmentUuid UUID відправлення
+	 * @param string $newRecipientUuid UUID попередньо створеного нового клієнта
+	 * @return array
+	 */
+	public function updateRecipient(string $shipmentUuid, string $newRecipientUuid): array
+	{
+		$url = $this->getUrl(function (string $url) use ($shipmentUuid) {
+			$url = str_replace(self::REQUEST_URL, 'shipments/management', $url);
+			return "{$url}/{$shipmentUuid}/recipient";
+		});
+
+		$token = $this->configuration->getToken();
+		
+		// Передаємо токен в query-параметрі згідно з документацією
+		$url .= '?token=' . urlencode($token);
+
+		// Тіло запиту (payload) для PUT запиту
+		$params = new Storage([
+			'recipient' => [
+				'uuid' => $newRecipientUuid
+			]
+		]);
+
+		return $this->send($url, $params, 'PUT');
+	}
+
+
+	
 }
