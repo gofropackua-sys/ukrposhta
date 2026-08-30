@@ -146,5 +146,28 @@ class Shipment extends Api
 
 		return $this->send($url, $params, 'PUT');
 	}
+
+	/**
+	 * Коригування суми післяплати відправлення.
+	 *
+	 * @param string $shipmentUuid Uuid відправлення
+	 * @param float|int $postPay Нова сума післяплати
+	 * @return array
+	 */
+	public function updatePostPay(string $shipmentUuid, $postPay): array
+	{
+		$url = $this->getUrl(function (string $url) use ($shipmentUuid) {
+			return str_replace('shipments', "shipments/management/{$shipmentUuid}/postpay", $url);
+		});
+
+		$token = $this->configuration->getToken();
+		$url .= '?token=' . urlencode($token);
+
+		$params = new Storage([
+			'postPay' => $postPay
+		]);
+
+		return $this->send($url, $params, 'PUT');
+	}
 	
 }
