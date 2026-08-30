@@ -119,17 +119,14 @@ class Shipment extends Api
 	 */
 public function forward(string $shipmentUuid, Storage $params): array
 	{
-		$token = $this->configuration->getToken();
-
-		$url = $this->getUrl(function (string $url) use ($shipmentUuid, $token) {
-			$path = str_replace('shipments', "shipments/management/{$shipmentUuid}/forward", $url);
-			return "{$path}?token=" . urlencode($token);
+		$url = $this->getUrl(function (string $url) use ($shipmentUuid) {
+			return str_replace('shipments', "shipments/management/{$shipmentUuid}/forward", $url);
 		});
 
-		// Раскомментируйте для отладки:
-	  var_dump($url); exit;
+		$token = $this->configuration->getToken();
+		$url .= '?token=' . urlencode($token);
 
-		return $this->send($url, $params, 'POST');
+		return $this->send($url, $params, 'PUT');
 	}
 	/**
 	 * Зміна ПІБ або номера телефону одержувача відправлення.
