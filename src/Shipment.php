@@ -126,6 +126,9 @@ public function forward(string $shipmentUuid, Storage $params): array
 			return "{$path}?token=" . urlencode($token);
 		});
 
+		// Раскомментируйте для отладки:
+		// var_dump($url); exit;
+
 		return $this->send($url, $params, 'POST');
 	}
 	/**
