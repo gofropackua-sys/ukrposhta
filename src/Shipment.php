@@ -127,7 +127,7 @@ public function forward(string $shipmentUuid, Storage $params): array
 		});
 
 		// Раскомментируйте для отладки:
-		// var_dump($url); exit;
+	  var_dump($url); exit;
 
 		return $this->send($url, $params, 'POST');
 	}
